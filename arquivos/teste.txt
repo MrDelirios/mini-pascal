@@ -1,0 +1,25 @@
+program TESTE();
+var
+    a, b, soma, divisao: real;
+var
+    arr : array [1 .. 10] of integer;
+begin
+    writeln('entre com a: ');
+    readln(a);
+    writeln('entre com b: ');
+    readln(b);
+//teste de comentario.
+#teste de comentario.
+    soma := a + b * (2 + 3 / 5.4);
+    
+    if soma >= 0 then
+        a := 0
+    else
+    begin
+        b := 3;
+        a := b + 5;
+    end;
+
+    divisao := a / b;
+    writeln('soma = ', soma);
+end.
