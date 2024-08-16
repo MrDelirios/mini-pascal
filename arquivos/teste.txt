@@ -1,4 +1,4 @@
-//comentario TESTE
+#comentario TESTE
 
 program TESTE();
 var
@@ -8,12 +8,12 @@ var
 
 procedure ExibirMensagem(msg: real);
 begin
-    writeln(msg);
+    writeln(msg)
 end;
 
 function Multiplicar(x, y: real): real;
 begin
-    Multiplicar := x * y;
+    Multiplicar := x * y
 end;
 
 begin

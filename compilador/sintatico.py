@@ -338,14 +338,14 @@ class Sintatico:
 
     # <resto_id> -> ( <expression_list> ) | LAMBDA
     def resto_id(self, token_id):
-        if self.tokenLido[0] == TOKEN.abrePar:
+        if self.tokenLido[0] == TOKEN.abrepar:
             tipo_id = self.semantico.consulta_tipo_id(token_id[1])
             if tipo_id != TOKEN.function:
                 msg = 'O identificador ' + token_id[1] + ' não é uma função.'
                 self.semantico.erroSemantico(msg)
-            self.consome(TOKEN.abrePar)
+            self.consome(TOKEN.abrepar)
             self.expression_list()
-            self.consome(TOKEN.fechaPar)
+            self.consome(TOKEN.fechapar)
         else:
             pass
 

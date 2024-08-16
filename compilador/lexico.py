@@ -32,6 +32,8 @@ class Lexico:
         return car
 
     def ungetchar(self, simbolo):
+        if simbolo == '\0':
+            return
         if simbolo == '\n':
             self.linha -= 1
         if self.indiceFonte > 0:

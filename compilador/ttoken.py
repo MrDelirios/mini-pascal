@@ -91,7 +91,7 @@ class TOKEN(IntEnum):
             37:'write',
             38:'readln',
             39:'read',
-            40: 'RETURN'
+            40: 'return'
             
         }
         return nomes[token]
