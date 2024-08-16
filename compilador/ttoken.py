@@ -47,6 +47,7 @@ class TOKEN(IntEnum):
     WRITE = 37
     READLN = 38
     READ = 39
+    RETURN = 40
 
     @classmethod
     def msg(cls, token):
@@ -89,7 +90,8 @@ class TOKEN(IntEnum):
             36:'writeln',
             37:'write',
             38:'readln',
-            39:'read'
+            39:'read',
+            40: 'RETURN'
             
         }
         return nomes[token]
@@ -119,6 +121,7 @@ class TOKEN(IntEnum):
             'write': TOKEN.WRITE,
             'readln': TOKEN.READLN,
             'read':TOKEN.READ,
+            'RETURN': TOKEN.RETURN,
         }
         if lexema in reservadas:
             return reservadas[lexema]

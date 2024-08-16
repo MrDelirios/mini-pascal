@@ -117,27 +117,33 @@ class Lexico:
                     estado = 31
                 elif simbolo.isalpha():
                     lexema += simbolo
-                    return (TOKEN.erro, lexema, lin, col)
+                    return (TOKEN.erro,lexema,lin,col)
                 else:
                     self.ungetchar(simbolo)
-                    return (TOKEN.numinteger,lexema, lin, col)
+                    return (TOKEN.numinteger,lexema,lin,col)
 
             elif estado == 31:
                 if simbolo.isdigit(): #se achou número depois do ponto, vai para o estado 32
                     estado = 32
+                elif simbolo == '.': #leu o .. do vetor. entao precisamos devolver o número que foi lido, e dar um unget pra desler esse segundo ponto e o primeiro ponto
+                    self.ungetchar(simbolo)
+                    self.ungetchar(simbolo)
+                    #lexeama = 1.
+                    lexema = lexema[:-1] # lexema = lexema[:-1] também dá certo
+                    return (TOKEN.numinteger, lexema, lin, col)
                 else:
                     self.ungetchar(simbolo)
-                    return (TOKEN.erro, lexema, lin, col)
+                    return (TOKEN.erro,lexema,lin,col)
 
             elif estado == 32:
                 if simbolo.isdigit(): #continua no estado 32 quando lê numeros
                     estado = 32
                 elif simbolo.isalpha(): #se tiver alugma letra no meio do número ele retorna erro
                     lexema += simbolo
-                    return (TOKEN.erro,lexema, lin, col)
+                    return (TOKEN.erro,lexema,lin,col)
                 else: #o número acabou
                     self.ungetchar(simbolo)
-                    return (TOKEN.numreal, lexema, lin, col)
+                    return (TOKEN.numreal,lexema,lin,col)
 
             elif estado == 4:
                 while True:
@@ -171,7 +177,7 @@ class Lexico:
                     return (TOKEN.relop, ">", lin, col)
             elif estado == 7:
                 if simbolo == ".":
-                    return (TOKEN.ptopto,'..', lin, col)
+                    return (TOKEN.ptopto,'..',lin, col)
                 else:
                     self.ungetchar(simbolo)
                     return (TOKEN.ponto,'.', lin, col)
@@ -187,7 +193,7 @@ class Lexico:
                         simbolo = self.getchar()
                 else:
                     self.ungetchar(simbolo)
-                    return (TOKEN.mulop, "/", lin, col)
+                    return (TOKEN.mulop, '/', lin, col)
             elif estado == 12:
                 while True:
                     if simbolo == "'" or simbolo == '"':
