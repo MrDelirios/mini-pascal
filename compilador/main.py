@@ -25,7 +25,7 @@ class Tradutor:
 
 # inicia a traducao
 if __name__ == '__main__':
-    x = Tradutor('/home/alunos/thales/mini-pascal/arquivos/teste.txt')
+    x = Tradutor('./arquivos/teste.txt')
     x.inicializa()
     x.traduz()
     x.sintatico.testaLexico()
