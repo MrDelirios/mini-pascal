@@ -1,39 +1,32 @@
-#comentario TESTE
-
 program TESTE();
 var
-    numeros: array[1..10] of integer;
+  a, b, soma, divisao: real;
 var
-    a, b, soma, divisao: real;
+  arr: array[1..10] of real;  // Declara um array de reais com 10 elementos
 
-procedure ExibirMensagem(msg: real);
-begin
-    writeln(msg)
-end;
+procedure folder(a : real ; b : real);
 
-function Multiplicar(x, y: real): real;
 begin
-    Multiplicar := x * y
+   writeln("a = ", a);
+   writeln("b = ", b)
 end;
 
 begin
-    writeln("Entre com a: ");
-    readln(a);
-    writeln("Entre com b: ");
-    readln(b);
+  writeln("entre com a: ");
+  folder(54,65);
+  readln(a);
+  writeln("entre com b: ");
+  readln(b);
+  soma := a + b * (2 + 3 / 5.4);
+//aaaaaaaaaaaaaaaa
+  if soma >= 0 then
+    a := 0
+  else
+  begin
+    b := 3;
+    a := b + 5
+  end;
 
-    soma := Multiplicar(a, b) + (2 + 5.4);
-
-    if soma >= 0 then
-        a := 0
-    else
-    begin
-        b := 3;
-        a := b + 5;
-    end;
-
-    divisao := a / b;
-    writeln("soma = ", soma);
-
-    ExibirMensagem("Teste do procedimento ExibirMensagem");
+  divisao := a / b;
+  writeln("soma = ", soma)
 end.

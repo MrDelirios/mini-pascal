@@ -11,23 +11,22 @@ class Sintatico:
 
     def __init__(self, lexico):
         self.lexico = lexico
-        self.nomeAlvo = 'alvo.out'
-        self.semantico = Semantico(self.nomeAlvo)
+        self.semantico = Semantico(self) #estou passando o sintatico pro semantico
 
     def traduz(self):
-        self.tokenLido = self.lexico.getToken()
-        try:
-            self.program()
+        self.tokenLido = self.lexico.getToken() # o sintatico pede para o lexico token por token
+        try: #ao receber o token ele vai na gramática e verifica se está de acordo com a gramática
+            self.program() #esse é o método de ponto de partida que faz ele entrar na gramátic
             print('Traduzido com sucesso.')
         except:
             pass
-        self.semantico.finaliza()
 
+    #o método que chama o consome, vai passar o lexema pra ser consumido. Entao aqui no metodo consome, é feita a verificação: o token que é pra ser consumido, é igual ao tokenLido do método traduz? Se sim, deu certo, se não, trata o erro aqui mesmo no consome "era esperado (tokenAtual) tal coisa mas veio tal coisa (tokenLido)"
     def consome(self, tokenAtual):
         (token, lexema, linha, coluna) = self.tokenLido
-        if tokenAtual == token:
+        if tokenAtual == token: #se o token consumido é igual ao token lido, pego um novo token pra analisar
             self.tokenLido = self.lexico.getToken()
-        else:
+        else: #trata o erro quando o token que era pra ser consumido não é igual ao token que foi lido
             msgTokenLido = TOKEN.msg(token)
             msgTokenAtual = TOKEN.msg(tokenAtual)
             print(f'Erro na linha {linha}, coluna {coluna}:')
@@ -37,6 +36,7 @@ class Sintatico:
                 msg = msgTokenLido
             print(f'Era esperado {msgTokenAtual} mas veio {msg}')
             raise Exception
+
 
     def testaLexico(self):
         self.tokenLido = self.lexico.getToken()
@@ -77,7 +77,6 @@ class Sintatico:
             return self.identifier_list()
         else:
             return []
-    #<declarations> -> var <identifier_list> : <type> ; <declarations> | LAMBDA
 
     # <declarations> -> var <identifier_list> : <type> ; <declarations> | LAMBDA
     def declarations(self):
@@ -89,8 +88,6 @@ class Sintatico:
             self.consome(TOKEN.pontovirg)
             self.semantico.declara(nomes,tipo)
             self.declarations()
-        else:
-            pass
 
     # <type> -> <standard_type> | array [ num .. num ] of <standard_type>
     def type(self):
@@ -102,20 +99,25 @@ class Sintatico:
             self.consome(TOKEN.numinteger)
             self.consome(TOKEN.fechacol)
             self.consome(TOKEN.of)
-            self.standard_type()
+            tipo = self.standard_type()
+            return (TOKEN.array,tipo)
         else:
-            self.standard_type()
+            return self.standard_type()
 
     # <standard_type> -> integer | real
     def standard_type(self):
         if self.tokenLido[0] == TOKEN.integer:
             self.consome(TOKEN.integer)
-        elif self.tokenLido[0] == TOKEN.REAL:
+            return TOKEN.integer
+        else:
             self.consome(TOKEN.REAL)
+            return TOKEN.REAL
 
     # <subprogram_declarations> -> <subprogram_declaration> ; <subprogram_declarations> | LAMBDA
     def subprogram_declarations(self):
-        if self.tokenLido[0] in [TOKEN.function, TOKEN.procedure]:
+        if self.tokenLido[0] == TOKEN.begin:
+            pass
+        else:
             self.subprogram_declaration()
             self.consome(TOKEN.pontovirg)
             self.subprogram_declarations()
@@ -125,12 +127,14 @@ class Sintatico:
         self.subprogram_head()
         self.declarations()
         self.compound_statement()
+        self.semantico.saiu_subrotina()
 
     # <subprogram_head> -> function id <arguments> : <standard_type> ; | procedure id <arguments> ;
     def subprogram_head(self):
         if self.tokenLido[0] == TOKEN.function:
             self.consome(TOKEN.function)
-            nomeFuncao = self.tokenLido[1]
+            nomeFuncao = [self.tokenLido[1]]
+            self.semantico.entrou_subrotina(nomeFuncao)
             self.consome(TOKEN.id)
             self.semantico.declara(nomeFuncao,TOKEN.function)
             self.arguments()
@@ -139,7 +143,8 @@ class Sintatico:
             self.consome(TOKEN.pontovirg)
         else:
             self.consome(TOKEN.procedure)
-            nomeProcedimento = self.tokenLido[1]
+            nomeProcedimento = [self.tokenLido[1]]
+            self.semantico.entrou_subrotina(nomeProcedimento)
             self.consome(TOKEN.id)
             self.semantico.declara(nomeProcedimento,TOKEN.procedure)
             self.arguments()
@@ -176,7 +181,9 @@ class Sintatico:
 
     # <optional_statements> -> <statement_list> | LAMBDA
     def optional_statements(self):
-        if self.tokenLido[0] in [TOKEN.id, TOKEN.begin, TOKEN.IF, TOKEN.WHILE, TOKEN.READ, TOKEN.WRITE, TOKEN.READLN, TOKEN.WRITELN]:
+        if self.tokenLido[0] == TOKEN.end:
+            pass
+        else:
             self.statement_list()
 
     # <statement_list> -> <statement> <resto_statement_list>
@@ -197,7 +204,7 @@ class Sintatico:
             nome = self.tokenLido[1]
             if self.semantico.existe_id(nome):
                 tipo = self.semantico.consulta_tipo_id(nome)
-                if tipo in [TOKEN.integer, TOKEN.REAL]:
+                if tipo in [TOKEN.integer,TOKEN.REAL]:
                     self.variable()
                     self.consome(TOKEN.assignop)
                     self.expression()
@@ -213,6 +220,10 @@ class Sintatico:
         elif self.tokenLido[0] == TOKEN.IF:
             self.if_statement()
 
+        elif self.tokenLido[0] == TOKEN.RETURN:
+            self.consome(TOKEN.RETURN)
+            self.expression()
+
         elif self.tokenLido[0] == TOKEN.WHILE:
             # while <expression> do <statement>
             self.consome(TOKEN.WHILE)
@@ -220,13 +231,8 @@ class Sintatico:
             self.consome(TOKEN.do)
             self.statement()
 
-        elif self.tokenLido[0] in [TOKEN.READ, TOKEN.READLN, TOKEN.WRITE, TOKEN.WRITELN]:
-            self.inputOutput()
-
         else:
-            # self.tokenLido[0] == TOKEN.RETURN:
-            self.consome(TOKEN.RETURN)
-            self.expression()
+            self.inputOutput()
 
     # <if_statement> -> if <expression> then <statement> <opc_else>
     def if_statement(self):
@@ -249,7 +255,9 @@ class Sintatico:
 
     # <opc_index> -> [ <expression> ] | LAMBDA
     def opc_index(self):
-        if self.tokenLido[0] == TOKEN.abrecol:
+        if self.tokenLido[0] == TOKEN.assignop:
+            pass
+        else:
             self.consome(TOKEN.abrecol)
             self.expression()
             self.consome(TOKEN.fechacol)
@@ -288,6 +296,7 @@ class Sintatico:
         if self.tokenLido[0] == TOKEN.relop:
             self.consome(TOKEN.relop)
             self.simple_expression()
+            self.resto_expression()
 
     # <simple_expression> -> <term> <resto_simple_expression>
     def simple_expression(self):
@@ -324,15 +333,18 @@ class Sintatico:
     # <factor> -> id <resto_id> | num | ( <expression> ) | not <factor>
     def factor(self):
         if self.tokenLido[0] == TOKEN.id:
+            token_id = self.tokenLido
             self.consome(TOKEN.id)
-            self.resto_id()
+            self.resto_id(token_id)
         elif self.tokenLido[0] == TOKEN.numinteger:
             self.consome(TOKEN.numinteger)
+        elif self.tokenLido[0] == TOKEN.numreal:
+            self.consome(TOKEN.numreal)
         elif self.tokenLido[0] == TOKEN.abrepar:
             self.consome(TOKEN.abrepar)
             self.expression()
             self.consome(TOKEN.fechapar)
-        elif self.tokenLido[0] == TOKEN.NOT:
+        else:
             self.consome(TOKEN.NOT)
             self.factor()
 
@@ -346,8 +358,6 @@ class Sintatico:
             self.consome(TOKEN.abrepar)
             self.expression_list()
             self.consome(TOKEN.fechapar)
-        else:
-            pass
 
     # <inputOutput> -> writeln(<outputs>) | write(<outputs>) | read(id)  | readln(id) 
     def inputOutput(self):
@@ -366,7 +376,7 @@ class Sintatico:
             self.consome(TOKEN.abrepar)
             self.consome(TOKEN.id)
             self.consome(TOKEN.fechapar)
-        elif self.tokenLido[0] == TOKEN.READLN:
+        else:
             self.consome(TOKEN.READLN)
             self.consome(TOKEN.abrepar)
             self.consome(TOKEN.id)
@@ -388,7 +398,9 @@ class Sintatico:
     def out(self):
         if self.tokenLido[0] == TOKEN.numinteger:
             self.consome(TOKEN.numinteger)
+        elif self.tokenLido[0] == TOKEN.numreal:
+            self.consome(TOKEN.numreal)
         elif self.tokenLido[0] == TOKEN.id:
             self.consome(TOKEN.id)
-        elif self.tokenLido[0] == TOKEN.string:
+        else:
             self.consome(TOKEN.string)

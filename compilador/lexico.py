@@ -49,13 +49,26 @@ class Lexico:
         estado = 1
         simbolo = self.getchar()
         lexema = ''
-        while simbolo in ['#', ' ', '\t', '\n']:
-            if simbolo == '#':
+        
+        while simbolo in ["/", " ", "\t", "\n"]:
+            # descarta comentários (que iniciam com // até o fim da linha)
+            if simbolo == "/":
+                # lexema = lexema + simbolo
                 simbolo = self.getchar()
-                while simbolo != '\n' and not self.fimDoArquivo():
+                if simbolo == "/":
                     simbolo = self.getchar()
-            while simbolo in [' ', '\t', '\n']:
+
+                    while simbolo != "\n":
+                        simbolo = self.getchar()
+                else:
+                    # Se não for um comentário, o caractere '/' não deve ser descartado.
+                    self.ungetchar(simbolo)  # retorna o caractere
+                    simbolo = "/"
+                    break
+            # descarta linhas brancas e espaços
+            while simbolo in [" ", "\t", "\n"]:
                 simbolo = self.getchar()
+        
         lin = self.linha
         col = self.coluna
         while True:
@@ -85,7 +98,7 @@ class Lexico:
                 elif simbolo == "*":
                     return (TOKEN.mulop, "*", lin, col)
                 elif simbolo == "/":
-                    estado = 11
+                    return (TOKEN.mulop,'/', lin, col)
                 elif simbolo == "<":
                     estado = 5
                 elif simbolo == ">":
@@ -189,13 +202,6 @@ class Lexico:
                 else:
                     self.ungetchar(simbolo)
                     return (TOKEN.doispontos, ':', lin, col)
-            elif estado == 11:
-                if simbolo == '/':
-                    while simbolo != '\n' and not self.fimDoArquivo():
-                        simbolo = self.getchar()
-                else:
-                    self.ungetchar(simbolo)
-                    return (TOKEN.mulop, '/', lin, col)
             elif estado == 12:
                 while True:
                     if simbolo == "'" or simbolo == '"':
