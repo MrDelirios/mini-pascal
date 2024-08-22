@@ -45,6 +45,7 @@ class Semantico:
                     if tipo == TOKEN.function or tipo == TOKEN.procedure:
                         tab_funcao = dict()
                         self.tabelaSimbolos[id] = (tipo,tab_funcao)
+                        self.entrou_subrotina(id)
                     else:
                         self.tabelaSimbolos[id] = (tipo, None)
                 else:
@@ -57,10 +58,15 @@ class Semantico:
     def existe_id(self, identificador):
         if self.subrotinaAtual != 'program':
             nome = self.subrotinaAtual
-            (tipo_rotina, tabela) = self.tabelaSimbolos[nome]
-            if identificador in tabela:
-                return True
+            if identificador in self.tabelaSimbolos:
 
+                (tipo_rotina, tabela) = self.tabelaSimbolos[nome]
+                if identificador in tabela:
+                    return True
+                else:
+                    return False
+            else:
+                return False
         if identificador in self.tabelaSimbolos:
             return True
         else:

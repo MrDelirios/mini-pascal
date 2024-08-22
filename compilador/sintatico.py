@@ -134,7 +134,6 @@ class Sintatico:
         if self.tokenLido[0] == TOKEN.function:
             self.consome(TOKEN.function)
             nomeFuncao = [self.tokenLido[1]]
-            self.semantico.entrou_subrotina(nomeFuncao)
             self.consome(TOKEN.id)
             self.semantico.declara(nomeFuncao,TOKEN.function)
             self.arguments()
@@ -144,7 +143,6 @@ class Sintatico:
         else:
             self.consome(TOKEN.procedure)
             nomeProcedimento = [self.tokenLido[1]]
-            self.semantico.entrou_subrotina(nomeProcedimento)
             self.consome(TOKEN.id)
             self.semantico.declara(nomeProcedimento,TOKEN.procedure)
             self.arguments()
@@ -204,7 +202,7 @@ class Sintatico:
             nome = self.tokenLido[1]
             if self.semantico.existe_id(nome):
                 tipo = self.semantico.consulta_tipo_id(nome)
-                if tipo in [TOKEN.integer,TOKEN.REAL]:
+                if tipo[0] in [TOKEN.integer,TOKEN.REAL]:
                     self.variable()
                     self.consome(TOKEN.assignop)
                     self.expression()
@@ -220,10 +218,6 @@ class Sintatico:
         elif self.tokenLido[0] == TOKEN.IF:
             self.if_statement()
 
-        elif self.tokenLido[0] == TOKEN.RETURN:
-            self.consome(TOKEN.RETURN)
-            self.expression()
-
         elif self.tokenLido[0] == TOKEN.WHILE:
             # while <expression> do <statement>
             self.consome(TOKEN.WHILE)
@@ -231,8 +225,14 @@ class Sintatico:
             self.consome(TOKEN.do)
             self.statement()
 
-        else:
+        elif self.tokenLido[0] in [TOKEN.READ, TOKEN.READLN, TOKEN.WRITE, TOKEN.WRITELN]:
             self.inputOutput()
+
+        else:
+            # self.tokenLido[0] == TOKEN.RETURN:
+            self.consome(TOKEN.RETURN)
+            self.expression()
+
 
     # <if_statement> -> if <expression> then <statement> <opc_else>
     def if_statement(self):
